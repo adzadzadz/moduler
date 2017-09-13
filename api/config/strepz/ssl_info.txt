@@ -1,0 +1,17 @@
+<?php
+
+/**
+  * @ref http://stackoverflow.com/questions/9738712/connect-to-remote-mysql-server-with-ssl-from-php
+  *
+  */
+
+// SAMPLE
+$pdo = new PDO('mysql:host=ip;dbname=db', 'user', 'pass', array(
+    PDO::MYSQL_ATTR_SSL_KEY    =>'/etc/mysql/ssl/client-key.pem',
+    PDO::MYSQL_ATTR_SSL_CERT=>'/etc/mysql/ssl/client-cert.pem',
+    PDO::MYSQL_ATTR_SSL_CA    =>'/etc/mysql/ssl/ca-cert.pem'
+    )
+);
+$statement = $pdo->query("SHOW TABLES;");
+$row = $statement->fetch(PDO::FETCH_ASSOC);
+echo htmlentities($row['_message']);

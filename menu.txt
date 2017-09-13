@@ -1,0 +1,32 @@
+Menu
+- Home
+- IAM (superadmin)
+
+===================
+- Project (superadmin, Project Mangager) (Audit : Read)
+  * Reporting 
+  * Actions (SME: Read, Add)
+  * Risk (SME: Read)
+  * Decision
+  * Issue
+  * Configuration
+- Portfolio (Program Manager)
+  * Reporting (Project Manager: Read)
+  * Configuration 
+- Settings (superadmin)
+  * Finance
+  * User Management
+
+Roles
+- Super Admin
+- Project Manager
+- Program Manager
+- SME
+- Audit
+
+Permissions
+- No Access
+- Read
+- Add
+- Full
+===================
