@@ -15,21 +15,13 @@ class ComposerStaticInitf39fa2bca30dd5d0e8efade40e9d9c0b
         'y' => 
         array (
             'yii\\swiftmailer\\' => 16,
-            'yii\\httpclient\\' => 15,
             'yii\\gii\\' => 8,
             'yii\\faker\\' => 10,
             'yii\\debug\\' => 10,
             'yii\\composer\\' => 13,
             'yii\\codeception\\' => 16,
             'yii\\bootstrap\\' => 14,
-            'yii\\authclient\\' => 15,
             'yii\\' => 4,
-        ),
-        'k' => 
-        array (
-            'kartik\\datetime\\' => 16,
-            'kartik\\base\\' => 12,
-            'kartik\\alert\\' => 13,
         ),
         'c' => 
         array (
@@ -39,16 +31,16 @@ class ComposerStaticInitf39fa2bca30dd5d0e8efade40e9d9c0b
         array (
             'Faker\\' => 6,
         ),
+        'E' => 
+        array (
+            'Egulias\\EmailValidator\\' => 23,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
         'yii\\swiftmailer\\' => 
         array (
             0 => __DIR__ . '/..' . '/yiisoft/yii2-swiftmailer',
-        ),
-        'yii\\httpclient\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/yiisoft/yii2-httpclient',
         ),
         'yii\\gii\\' => 
         array (
@@ -74,25 +66,9 @@ class ComposerStaticInitf39fa2bca30dd5d0e8efade40e9d9c0b
         array (
             0 => __DIR__ . '/..' . '/yiisoft/yii2-bootstrap',
         ),
-        'yii\\authclient\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/yiisoft/yii2-authclient',
-        ),
         'yii\\' => 
         array (
             0 => __DIR__ . '/..' . '/yiisoft/yii2',
-        ),
-        'kartik\\datetime\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/kartik-v/yii2-widget-datetimepicker',
-        ),
-        'kartik\\base\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/kartik-v/yii2-krajee-base',
-        ),
-        'kartik\\alert\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/kartik-v/yii2-widget-alert',
         ),
         'cebe\\markdown\\' => 
         array (
@@ -101,6 +77,10 @@ class ComposerStaticInitf39fa2bca30dd5d0e8efade40e9d9c0b
         'Faker\\' => 
         array (
             0 => __DIR__ . '/..' . '/fzaninotto/faker/src/Faker',
+        ),
+        'Egulias\\EmailValidator\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/egulias/email-validator/EmailValidator',
         ),
     );
 
@@ -114,6 +94,10 @@ class ComposerStaticInitf39fa2bca30dd5d0e8efade40e9d9c0b
         ),
         'D' => 
         array (
+            'Doctrine\\Common\\Lexer\\' => 
+            array (
+                0 => __DIR__ . '/..' . '/doctrine/lexer/lib',
+            ),
             'Diff' => 
             array (
                 0 => __DIR__ . '/..' . '/phpspec/php-diff/lib',

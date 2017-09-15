@@ -90,9 +90,9 @@ return [
             'enableStrictParsing' => true,
             'showScriptName' => false,
             'rules' => [
-                // 'see/<module:\w+>' => '<module>/default/index',
-                // 'see/<module:\w+>/<controller>' => '<module>/<controller>/index',
-                // 'see/<module:\w+>/<controller:\w+>/<action>' => '<module>/<controller>/<action>',
+                'see/<module:\w+>' => '<module>/default/index',
+                'see/<module:\w+>/<controller>' => '<module>/<controller>/index',
+                'see/<module:\w+>/<controller:\w+>/<action>' => '<module>/<controller>/<action>',
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => [

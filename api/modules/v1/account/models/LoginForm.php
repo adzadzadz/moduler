@@ -92,17 +92,6 @@ class LoginForm extends Model
         return $this->_fncUser;
     }
 
-    // public function registrationAutoLogin($username)
-    // {
-    //     $this->username = $username;
-    //     Yii::$app->session->set('user_temp_mode', false);
-    //     if (!Yii::$app->user->isGuest) {
-    //         return true;
-    //     } else {
-    //         return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);    
-    //     }        
-    // }
-
     // TEMPORARY USER STUFF
     public function tmpLogin($company_id, $user_id)
     {
@@ -122,15 +111,6 @@ class LoginForm extends Model
         }
         return $this->_tmpUser;
     }
-
-    // public function registrationTmpUserAutoLogin($username)
-    // {
-    //     $this->username = $username;
-    //     // VERY IMPORTANT TO USE TEMPORARY DB FOR LOGGING
-    //     Yii::$app->user->identityClass = 'api\modules\v1\account\models\TmpUser';
-    //     Yii::$app->session->set('user_temp_mode', true);
-    //     return Yii::$app->user->login($this->getTmpUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
-    // }
 
     public function attributeLabels()
     {

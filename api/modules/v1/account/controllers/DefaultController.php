@@ -97,11 +97,6 @@ class DefaultController extends ActiveController
         return $actions;
     }
 
-    public function actionIndex()
-    {
-        return 'adz';
-    }
-
     /**
      * Signup method for new users
      * @method POST | email, password, confirmpassword
