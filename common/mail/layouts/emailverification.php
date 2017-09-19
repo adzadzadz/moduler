@@ -8,7 +8,7 @@ use yii\helpers\Html;
 <?php $this->beginPage() ?>
 <?php $this->beginBody() ?>
 
-<?= \Yii::t('verification_email_message','Your account is almost ready. Copy the code below to Strepz.com') ?>
+<?= 'Your account is almost ready. Copy the code below to Strepz.com' ?>
 <?= "\n\r\n" ?>
 <?= $code ?>
 
