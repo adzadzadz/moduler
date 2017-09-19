@@ -51,13 +51,11 @@ return [
             ]
         ],
         'response' => [
-            // ...
             'formatters' => [
                 \yii\web\Response::FORMAT_JSON => [
                     'class' => 'yii\web\JsonResponseFormatter',
-                    'prettyPrint' => YII_DEBUG, // use "pretty" output in debug mode
+                    // 'prettyPrint' => YII_DEBUG, // use "pretty" output in debug mode
                     'encodeOptions' => JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE,
-                    // ...
                 ],
             ],
         ],
@@ -93,10 +91,29 @@ return [
                 'see/<module:\w+>' => '<module>/default/index',
                 'see/<module:\w+>/<controller>' => '<module>/<controller>/index',
                 'see/<module:\w+>/<controller:\w+>/<action>' => '<module>/<controller>/<action>',
+
+                [
+                    'class' => 'api\modules\v1\account\rest\AuthUrlRule',
+                    'pluralize' => true,
+                    'controller' => [
+                        'v1/auth' => 'accounts/auth',
+                    ],
+                    'except' => ['delete'],
+                ],
+                [
+                    'class' => 'api\modules\v1\account\rest\DefaultUrlRule',
+                    'pluralize' => true,
+                    'controller' => [
+                        'v1/accounts' => 'accounts/default',
+                    ],
+                    'except' => ['delete'],
+                ],
                 [
                     'class' => 'yii\rest\UrlRule',
+                    'pluralize' => true,
                     'controller' => [
-                        'v1/users' => 'accounts/user'
+                        'v1/users' => 'accounts/user',
+                        'v1/accounts' => 'accounts/default'
                     ],
                     'except' => ['delete'],
                 ],
@@ -105,7 +122,7 @@ return [
     ],
     'modules' => [
         'accounts' => [
-            'class' => 'api\modules\v1\account\Account',
+            'class' => 'api\modules\v1\account\Module',
         ],
         'admin' => [
             'class' => 'api\modules\admin\Admin'

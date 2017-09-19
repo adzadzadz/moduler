@@ -32,7 +32,7 @@ $fieldOptions2 = [
     <div class="login-box-body">
         <p class="login-box-msg">Sign in to start your session</p>
 
-        <?= Html::beginForm(['auth/login'], 'post', ['enctype' => 'multipart/form-data']) ?>
+        <?= Html::beginForm(['default/login'], 'post', ['enctype' => 'multipart/form-data']) ?>
         
         <?= Html::input('text', 'username', null, $fieldOptions1) ?>
 

@@ -1,0 +1,13 @@
+Helpful commands:
+
+###############################################################################
+##################### Global System Migration Helper ##########################
+###############################################################################
+
+- Create migration file
+-- $ php yii migrate/create create_any_table --migrationPath=@app/migrations_glb
+
+- Migrate tables to a specific database. See sample below.
+-- $ php yii migrate --migrationPath=@app/migrations/migrations_glb_sys --db=glb_sys_db_01
+
+#################################### END ######################################

@@ -80,6 +80,7 @@ class UserController extends \yii\rest\ActiveController
      */
     public function actionIndex()
     {
+        throw new NotFoundHttpException;
         $data = [];
         $list = \api\modules\v1\account\models\FncUser::find()
             ->where(['!=', 'id', Yii::$app->user->id])
@@ -170,8 +171,12 @@ class UserController extends \yii\rest\ActiveController
             }
         }
 
+        if ($id > 0) {
+            throw new NotFoundHttpException;
+        }
+
         // If no data is passed, 
-        if (!Yii::$app->user->isGuest && $id == 'self') {
+        if (!Yii::$app->user->isGuest && $id == 0) {
             return $this->getMe();
         }
 

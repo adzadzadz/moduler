@@ -110,6 +110,10 @@ class DefaultController extends ActiveController
             // Username is the email address 
             $data['SignupForm']['username'] = $data['SignupForm']['email'];
         }
+
+        // force validate to show errors if load data fails
+        $model->validate();
+
         if ($model->load($data)) {
             if ($user = $model->tmpSignup()) {
                 if (SignupForm::sendVerificationEmail($user->username, $user->email, $user->firstname . ' ' . $user->lastname, $user->verification_code)) {
@@ -133,74 +137,74 @@ class DefaultController extends ActiveController
      * Login method for users
      * @method POST | username, password
      */
-    public function actionLogin()
-    {
-        $currentRegion = strtolower(Yii::$app->params['app_region']);
-        if (!$currentRegion) {
-            return 'APPLICATION IS BROKEN! LOL!';
-        }
-        $model = new LoginForm();
-        $data = [];
-        if (!Yii::$app->request->post()) {
-            // $data = [
-            //     'LoginForm' => [
-            //         'username' => $username,
-            //         'password' => $password
-            //     ]
-            // ];
-            return false;
-        } else {
-            $data['LoginForm'] = Yii::$app->request->post();
-        }
-        if ($model->load($data)) {
-            if($user = \api\modules\v1\account\models\GlbUser::getUserData($model->username)) {
-                Yii::$app->strepzConfig->setCompanyId($user->company_id);
-                $userRegion = $user['company']->region;
-                $userStatus = $user->status;
-                // Workaround for unverified users
-                if ($userStatus !== GlbUser::STATUS_ACTIVE) {
-                    Yii::$app->strepzConfig->setIsTempUser($userStatus);
-                    if ($token = $model->tmpLogin($user->company_id, $user->user_id)) {
-                        return [
-                            'error' => null,
-                            'content' => [
-                                'type' => 'Bearer',
-                                'token' => $token
-                            ]
-                        ];
-                    }
-                }
-                // Requires strict refactoring
-                if ($token = $model->tmpLogin($user->company_id, $user->user_id)) {
-                    if ($userRegion === $currentRegion) {
-                        // return $this->goBack();
-                        \api\modules\v1\account\models\FncConfig::selectProject(0);
-                        return [
-                            'error' => null,
-                            'content' => [
-                                'type' => 'Bearer',
-                                'token' => $token
-                            ]
-                        ];
-                    } else {
-                        if ($this->_auth_key = $model->getUser()->auth_key) {
-                            $this->_username = $model->getUser()->username;
-                            Yii::$app->user->logout();
-                            // return $this->redirect(Yii::$app->params[$userRegion . '_domain'] . Url::to(['site/login-auth', 'auth_key' => $this->_auth_key, 'username' => $this->_username]));
-                            \api\modules\v1\account\models\FncConfig::selectProject(0);
-                            return true;
-                        }
-                    }
-                }
-            }
-            // This is just so the error shows up as it validates the user
-            $model->addError('password', 'Incorrect username or password.');
-        }
-        return ['error' => $model->getErrors()];
-    }
+    // public function actionLogin()
+    // {
+    //     $currentRegion = strtolower(Yii::$app->params['app_region']);
+    //     if (!$currentRegion) {
+    //         return 'APPLICATION IS BROKEN! LOL!';
+    //     }
+    //     $model = new LoginForm();
+    //     $data = [];
+    //     if (!Yii::$app->request->post()) {
+    //         // $data = [
+    //         //     'LoginForm' => [
+    //         //         'username' => $username,
+    //         //         'password' => $password
+    //         //     ]
+    //         // ];
+    //         return false;
+    //     } else {
+    //         $data['LoginForm'] = Yii::$app->request->post();
+    //     }
+    //     if ($model->load($data)) {
+    //         if($user = \api\modules\v1\account\models\GlbUser::getUserData($model->username)) {
+    //             Yii::$app->strepzConfig->setCompanyId($user->company_id);
+    //             $userRegion = $user['company']->region;
+    //             $userStatus = $user->status;
+    //             // Workaround for unverified users
+    //             if ($userStatus !== GlbUser::STATUS_ACTIVE) {
+    //                 Yii::$app->strepzConfig->setIsTempUser($userStatus);
+    //                 if ($token = $model->tmpLogin($user->company_id, $user->user_id)) {
+    //                     return [
+    //                         'success' => true,
+    //                         'content' => [
+    //                             'type' => 'Bearer',
+    //                             'token' => $token
+    //                         ]
+    //                     ];
+    //                 }
+    //             }
+    //             // Requires strict refactoring
+    //             if ($token = $model->tmpLogin($user->company_id, $user->user_id)) {
+    //                 if ($userRegion === $currentRegion) {
+    //                     // return $this->goBack();
+    //                     \api\modules\v1\account\models\FncConfig::selectProject(0);
+    //                     return [
+    //                         'success' => true,
+    //                         'content' => [
+    //                             'type' => 'Bearer',
+    //                             'token' => $token
+    //                         ]
+    //                     ];
+    //                 } else {
+    //                     if ($this->_auth_key = $model->getUser()->auth_key) {
+    //                         $this->_username = $model->getUser()->username;
+    //                         Yii::$app->user->logout();
+    //                         // return $this->redirect(Yii::$app->params[$userRegion . '_domain'] . Url::to(['site/login-auth', 'auth_key' => $this->_auth_key, 'username' => $this->_username]));
+    //                         \api\modules\v1\account\models\FncConfig::selectProject(0);
+    //                         return true;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         // This is just so the error shows up as it validates the user
+    //         $model->addError('password', 'Incorrect username or password.');
+    //     }
+    //     return ['error' => $model->getErrors()];
+    // }
 
     /**
-     * PLEASE BE INFORMED THAT THE ID (at least in this case) IS ACTUALLY THE USERNAME Y_Y
+     * PLEASE BE INFORMED THAT THE ID (at least in this case) IS ACTUALLY THE USERNAME/EMAIL Y_Y
      * e.g myname@strepz.com
      */
     public function actionBuild($id = null, $token = null, $method = null)

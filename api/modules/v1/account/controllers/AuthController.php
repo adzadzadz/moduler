@@ -3,33 +3,91 @@
 namespace api\modules\v1\account\controllers;
 
 use Yii;
+use yii\rest\Controller;
+use yii\filters\auth\CompositeAuth;
+use yii\filters\auth\HttpBasicAuth;
+use yii\filters\auth\QueryParamAuth;
+use yii\rest\ActiveController;
+use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
+use common\components\authclient\StrepzHttpBearerAuth;
 use api\modules\v1\account\models\auth\AuthClient;
 use api\modules\v1\account\models\LoginForm;
+use api\modules\v1\account\models\SignupForm;
+use api\modules\v1\account\models\FncSignupForm;
+use api\modules\v1\account\models\GlbUser;
+use api\modules\v1\account\models\TmpUser;
+use api\modules\v1\account\models\PasswordResetRequestForm;
+use api\modules\v1\account\models\ResetPasswordForm;
 
-class AuthController extends \yii\web\Controller
+class AuthController extends Controller
 {
-	public function init()
-	{
-		parent::init();
-		$this->layout = 'main';
-		$this->viewPath = Yii::getAlias('@accountView');
-	}
+	public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+        $auth = $behaviors['authenticator'];
+        unset($behaviors['authenticator']);
 
-	public function actionIndex()
-	{
-		if (!Yii::$app->user->isGuest) {
-			return false;
-		}
+        return ArrayHelper::merge($behaviors, [
+            'corsFilter' => [
+                'class' => Yii::$app->strepzCorsFilter->className(),
+            ],
+            'authenticator' => [
+                'class' => CompositeAuth::className(),
+                'except' => ['options', 'login'],
+                'authMethods' => [
+                    HttpBasicAuth::className(),
+                    StrepzHttpBearerAuth::className(),
+                    QueryParamAuth::className(),
+                ],
+            ],
+            'access' => [
+                'class' => AccessControl::className(),
+                'only' => [],
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => [],
+                        'roles' => ['@'],
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['login'],
+                        'roles' => ['?'],
+                    ],
+                ],
+            ],
+            'verbs' => [
+                'class' => \yii\filters\VerbFilter::className(),
+                'actions' => [
+                    'request-password-reset'  => ['post'],
+                    'login'   => ['post', 'get'],
+                    'signup' => ['post'],
+                    'verify-reset-token' => ['post']
+                ],
+            ],
+        ]);
+    }
 
-		$model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return true;
-        } else {
-            return $this->render('auth/index', [
-                'model' => $model,
-            ]);
-        }
- 	}
+	// public function actionIndex()
+	// {
+	// 	if (!Yii::$app->user->isGuest) {
+	// 		return false;
+	// 	}
+
+	// 	$this->layout = 'main';
+	// 	$this->viewPath = Yii::getAlias('@accountView');
+
+	// 	$model = new LoginForm();
+ //        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+ //            return true;
+ //        } else {
+ //            return $this->render('auth/index', [
+ //                'model' => $model,
+ //            ]);
+ //        }
+ // 	}
 
  	/**
      * Login method for users
@@ -43,17 +101,11 @@ class AuthController extends \yii\web\Controller
         }
         $model = new LoginForm();
         $data = [];
-        if (!Yii::$app->request->post()) {
-            // $data = [
-            //     'LoginForm' => [
-            //         'username' => $username,
-            //         'password' => $password
-            //     ]
-            // ];
-            return false;
-        } else {
+        
+        if (Yii::$app->request->post()) {
             $data['LoginForm'] = Yii::$app->request->post();
         }
+
         if ($model->load($data)) {
             if($user = \api\modules\v1\account\models\GlbUser::getUserData($model->username)) {
                 Yii::$app->strepzConfig->setCompanyId($user->company_id);
@@ -64,7 +116,7 @@ class AuthController extends \yii\web\Controller
                     Yii::$app->strepzConfig->setIsTempUser($userStatus);
                     if ($token = $model->tmpLogin($user->company_id, $user->user_id)) {
                         return [
-                            'error' => null,
+                            'success' => true,
                             'content' => [
                                 'type' => 'Bearer',
                                 'token' => $token
@@ -78,7 +130,7 @@ class AuthController extends \yii\web\Controller
                         // return $this->goBack();
                         \api\modules\v1\account\models\FncConfig::selectProject(0);
                         return [
-                            'error' => null,
+                            'success' => true,
                             'content' => [
                                 'type' => 'Bearer',
                                 'token' => $token
@@ -98,7 +150,8 @@ class AuthController extends \yii\web\Controller
             // This is just so the error shows up as it validates the user
             $model->addError('password', 'Incorrect username or password.');
         }
+
+        $model->validate();
         return ['error' => $model->getErrors()];
     }
-
 }

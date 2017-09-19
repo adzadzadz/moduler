@@ -2,17 +2,17 @@
 
 namespace api\modules\v1\account;
 
+use Yii;
+
 /**
  * project module definition class
  */
-class Account extends \yii\base\Module
+class Module extends \yii\base\Module
 {
     /**
      * @inheritdoc
      */
     public $controllerNamespace = 'api\modules\v1\account\controllers';
-    public $modelNamespace = 'api\modules\v1\account\models';
-
 
     /**
      * @inheritdoc
@@ -21,8 +21,12 @@ class Account extends \yii\base\Module
     {
         parent::init();
 
-        \Yii::setAlias('accountView', dirname(__FILE__) . '/views');
+        $this->bootstrap();
+    }
 
-        // custom initialization code goes here
+    private function bootstrap()
+    {
+        Yii::setAlias('accountView', dirname(__FILE__) . '/views');
+        Yii::setAlias('migrationPath', dirname(__FILE__) . '/console/migrations');
     }
 }

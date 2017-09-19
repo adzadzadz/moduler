@@ -77,7 +77,7 @@ class SignupForm extends ActiveRecord
             ['username', 'required'],
             ['username', 'email'],
             ['username', 'unique', 'targetClass' => '\common\models\GlbUser', 'message' => 'This username has already been taken.'],
-            ['username', 'string', 'min' => 2, 'max' => 255],
+            ['username', 'string', 'min' => 6, 'max' => 255],
 
             // ['email', 'filter', 'filter' => 'trim'],
             ['email', 'required'],
@@ -347,7 +347,7 @@ class SignupForm extends ActiveRecord
 
     private function initTmpTables()
     {
-        $tmpTables = new \frontend\migrations\TmpTables([
+        $tmpTables = new \api\modules\v1\account\migrations\TmpTables([
             'db' => 'glb_reg_db_01'
         ]);
         if ($tmpTables->up()) {
