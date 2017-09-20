@@ -55,12 +55,13 @@ class DefaultController extends ActiveController
                     'build', 
                     'request-password-reset', 
                     'verify-reset-token', 
-                    'reset-password'
+                    'reset-password',
+                    'verify'
                 ],
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['update-info', 'build'],
+                        'actions' => ['update-info', 'build', 'verify'],
                         'roles' => ['@'],
                     ],
                     [
@@ -120,7 +121,7 @@ class DefaultController extends ActiveController
                     // Fetch user token from global user_token table
                     $token = \api\modules\v1\account\models\GlbUserToken::getToken($user->_company_id, $user->user_id);
                     return [
-                            'error' => null,
+                            'success' => true,
                             'content' => [
                                 'type' => 'Bearer',
                                 'token' => $token
@@ -134,102 +135,34 @@ class DefaultController extends ActiveController
     }
 
     /**
-     * Login method for users
-     * @method POST | username, password
+     * Builds user data to the functional databases.
+     * This simply means that the user is verified and can now use the app's features
+     * @return json the build result
      */
-    // public function actionLogin()
-    // {
-    //     $currentRegion = strtolower(Yii::$app->params['app_region']);
-    //     if (!$currentRegion) {
-    //         return 'APPLICATION IS BROKEN! LOL!';
-    //     }
-    //     $model = new LoginForm();
-    //     $data = [];
-    //     if (!Yii::$app->request->post()) {
-    //         // $data = [
-    //         //     'LoginForm' => [
-    //         //         'username' => $username,
-    //         //         'password' => $password
-    //         //     ]
-    //         // ];
-    //         return false;
-    //     } else {
-    //         $data['LoginForm'] = Yii::$app->request->post();
-    //     }
-    //     if ($model->load($data)) {
-    //         if($user = \api\modules\v1\account\models\GlbUser::getUserData($model->username)) {
-    //             Yii::$app->strepzConfig->setCompanyId($user->company_id);
-    //             $userRegion = $user['company']->region;
-    //             $userStatus = $user->status;
-    //             // Workaround for unverified users
-    //             if ($userStatus !== GlbUser::STATUS_ACTIVE) {
-    //                 Yii::$app->strepzConfig->setIsTempUser($userStatus);
-    //                 if ($token = $model->tmpLogin($user->company_id, $user->user_id)) {
-    //                     return [
-    //                         'success' => true,
-    //                         'content' => [
-    //                             'type' => 'Bearer',
-    //                             'token' => $token
-    //                         ]
-    //                     ];
-    //                 }
-    //             }
-    //             // Requires strict refactoring
-    //             if ($token = $model->tmpLogin($user->company_id, $user->user_id)) {
-    //                 if ($userRegion === $currentRegion) {
-    //                     // return $this->goBack();
-    //                     \api\modules\v1\account\models\FncConfig::selectProject(0);
-    //                     return [
-    //                         'success' => true,
-    //                         'content' => [
-    //                             'type' => 'Bearer',
-    //                             'token' => $token
-    //                         ]
-    //                     ];
-    //                 } else {
-    //                     if ($this->_auth_key = $model->getUser()->auth_key) {
-    //                         $this->_username = $model->getUser()->username;
-    //                         Yii::$app->user->logout();
-    //                         // return $this->redirect(Yii::$app->params[$userRegion . '_domain'] . Url::to(['site/login-auth', 'auth_key' => $this->_auth_key, 'username' => $this->_username]));
-    //                         \api\modules\v1\account\models\FncConfig::selectProject(0);
-    //                         return true;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         // This is just so the error shows up as it validates the user
-    //         $model->addError('password', 'Incorrect username or password.');
-    //     }
-    //     return ['error' => $model->getErrors()];
-    // }
-
-    /**
-     * PLEASE BE INFORMED THAT THE ID (at least in this case) IS ACTUALLY THE USERNAME/EMAIL Y_Y
-     * e.g myname@strepz.com
-     */
-    public function actionBuild($id = null, $token = null, $method = null)
+    public function actionBuild()
     {
         // Avoiding execution time error. 
         set_time_limit ( 360 );
 
-        if (Yii::$app->user->isGuest || Yii::$app->user->identity->status < 6) {
-            if ($id === null || $token === null) {
-                throw new ForbiddenHttpException('You are not allowed to perform this action.');
-            }
-        } else {
-            $id = Yii::$app->user->identity->username;
+        // email/username and token must be present to build user
+        if (Yii::$app->user->isGuest || Yii::$app->user->identity->status < 6 || Yii::$app->request->post('token') === null) {
+            throw new \yii\web\NotFoundHttpException('Page not found', 404);
         }
 
+        $token = Yii::$app->request->post('token');
+        $username = Yii::$app->user->identity->username;
+
+        // Gather essential data to perform build
         $currentRegion = strtolower(Yii::$app->params['app_region']);
-        $glbUser = GlbUser::getUserData($id);
+        $glbUser = GlbUser::getUserData($username);
         $glbUser =  $glbUser['company'];
         Yii::$app->strepzConfig->setCompanyId($glbUser->company_id);
 
         if ($currentRegion === $glbUser->region) {
             $tmpUser = new TmpUser;
             
-            if (Yii::$app->user->isGuest && $token !== null) {
-                $user = $tmpUser->findUserByRegistrationToken($id, $token);
+            if (Yii::$app->user->isGuest && $token) {
+                $user = $tmpUser->findUserByRegistrationToken($username, $token);
             } else {
                 $user = TmpUser::findOne(Yii::$app->user->id);
             }
@@ -239,19 +172,59 @@ class DefaultController extends ActiveController
                 if ($setUser = $signup->signup($user->id)) {
                     Yii::$app->strepzConfig->setIsTempUser($setUser->status);
 
-                    if ($method == 'email') {
-                        return $this->redirect('/');
-                    } else {
-                        return true;
-                    }
+                    return [
+                        'success' => true,
+                        'message' => 'User account has been succesfully built.'
+                    ];
                 }
             }
         } else {
-            // REDIRECTION URL WITH ID AND TOKEN AS PARAMS if region does not match
-            $token = Yii::$app->user->identity->_registration_token;
-            $this->redirect(Yii::$app->params[$glbUser->region . '_domain'] . Url::to(['registration/finalize', 'id' => $id, 'token' => $token]));
+            // Regions does not match, present a solution or display error
+            return [
+                'success' => false,
+                'error' => [
+                    'message' => 'The regions does not match. Please contact the administrator.'
+                ]
+            ];
         }
-        throw new ForbiddenHttpException('You are not allowed to perform this action.');
+        throw new \yii\web\NotFoundHttpException('Page not found', 404);
+    }
+
+    /**
+     * Verify user's email
+     * @return boolean verification result
+     */
+    public function actionVerify()
+    {
+        if (isset(Yii::$app->request->post()['code'])) {
+            $code = Yii::$app->request->post()['code'];
+            $user = new TmpUser();
+            $userData = $user->getUser();
+
+            $glbUser = GlbUser::getUserData($userData->username);
+            $glbCompany = $glbUser['company'];
+
+            if ( $userData->status < TmpUser::STATUS_VERIFIED ) {
+                if ($code === $userData->verification_code) {
+                
+                    $glbUser->status = TmpUser::STATUS_VERIFIED;
+                    $userData->status = TmpUser::STATUS_VERIFIED;
+
+                    if ($userData->save() && $glbUser->save()) {
+                        return [
+                            'success' => true,
+                            'message' => 'Account succesfully verified.'
+                        ];
+                    }
+                }
+            } else {
+                return [
+                    'success' => true,
+                    'message' => 'Account is already verified.'
+                ];
+            }
+        }
+        throw new \yii\web\NotFoundHttpException('Page not found', 404);
     }
 
 

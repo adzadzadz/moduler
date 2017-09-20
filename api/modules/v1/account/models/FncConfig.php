@@ -123,7 +123,7 @@ class FncConfig extends ActiveRecord
      * This is where tables are initialized. All required tables should be added here.
      * @return Boolean
      */
-    public function initConfigTables()
+    public function initTables()
     {
         return $this->createCompanyConfigTable();
     }

@@ -21,6 +21,7 @@ class Module extends \yii\base\Module
     {
         parent::init();
 
+        // Initialize requirements for the module
         $this->bootstrap();
     }
 

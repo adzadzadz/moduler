@@ -14,6 +14,8 @@ class AuthUrlRule extends \yii\rest\UrlRule
         // 'PUT,PATCH {id}' => 'update',
         // 'DELETE {id}' => 'delete',
         // 'GET,HEAD {id}' => 'view',
+        'GET {theo}' => 'theo',
+        'GET,HEAD' => 'csrf',
         'POST' => 'login',
         // 'POST new' => 'signup',
         // 'GET,HEAD' => 'index',

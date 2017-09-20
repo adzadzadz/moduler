@@ -30,7 +30,7 @@ class FncRbac extends Model
      * This is where tables are initialized. All required tables should be added here.
      * @return Boolean
      */
-    public function initRbacTables()
+    public function initTables()
     {        
         return $this->createRbacTables();
     }

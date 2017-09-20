@@ -65,60 +65,6 @@ return [
             // This "db" property is just a placeholder. Doesn't suppose to do any shit really
             'db' => 'glb_sys_db_01',
         ],
-        'authClientCollection' => [
-            'class' => 'yii\authclient\Collection',
-            'clients' => [
-                'google' => [
-                    'class' => 'yii\authclient\clients\Google',
-                    'clientId' => '812656492191-h7ad5i2q21dtadedh1vbnh6mm0qh09fl.apps.googleusercontent.com',
-                    'clientSecret' => 'gbk4Xyn2UrurP6eCYiR2ayqr',
-                ],
-            ],
-        ],
-        'strepzCorsFilter' => [
-            'class' => '\yii\filters\Cors',
-            'cors' => [
-                'Origin' => ['*'],
-                'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'HEAD', 'OPTIONS'],
-                'Access-Control-Request-Headers' => ['*'],
-            ],
-        ],
-        'urlManager' => [
-            'enablePrettyUrl' => true,
-            'enableStrictParsing' => true,
-            'showScriptName' => false,
-            'rules' => [
-                'see/<module:\w+>' => '<module>/default/index',
-                'see/<module:\w+>/<controller>' => '<module>/<controller>/index',
-                'see/<module:\w+>/<controller:\w+>/<action>' => '<module>/<controller>/<action>',
-
-                [
-                    'class' => 'api\modules\v1\account\rest\AuthUrlRule',
-                    'pluralize' => true,
-                    'controller' => [
-                        'v1/auth' => 'accounts/auth',
-                    ],
-                    'except' => ['delete'],
-                ],
-                [
-                    'class' => 'api\modules\v1\account\rest\DefaultUrlRule',
-                    'pluralize' => true,
-                    'controller' => [
-                        'v1/accounts' => 'accounts/default',
-                    ],
-                    'except' => ['delete'],
-                ],
-                [
-                    'class' => 'yii\rest\UrlRule',
-                    'pluralize' => true,
-                    'controller' => [
-                        'v1/users' => 'accounts/user',
-                        'v1/accounts' => 'accounts/default'
-                    ],
-                    'except' => ['delete'],
-                ],
-            ],
-        ],
     ],
     'modules' => [
         'accounts' => [

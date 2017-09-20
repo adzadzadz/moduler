@@ -35,7 +35,7 @@ class AuthController extends Controller
             ],
             'authenticator' => [
                 'class' => CompositeAuth::className(),
-                'except' => ['options', 'login'],
+                'except' => ['options', 'login', 'csrf'],
                 'authMethods' => [
                     HttpBasicAuth::className(),
                     StrepzHttpBearerAuth::className(),
@@ -44,7 +44,7 @@ class AuthController extends Controller
             ],
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => [],
+                'only' => ['login', 'csrf'],
                 'rules' => [
                     [
                         'allow' => true,
@@ -53,7 +53,7 @@ class AuthController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['login'],
+                        'actions' => ['login', 'csrf'],
                         'roles' => ['?'],
                     ],
                 ],
@@ -61,33 +61,21 @@ class AuthController extends Controller
             'verbs' => [
                 'class' => \yii\filters\VerbFilter::className(),
                 'actions' => [
-                    'request-password-reset'  => ['post'],
-                    'login'   => ['post', 'get'],
-                    'signup' => ['post'],
-                    'verify-reset-token' => ['post']
+                    'login' => ['post'],
+                    'csrf' => ['head','get'],
                 ],
             ],
         ]);
     }
 
-	// public function actionIndex()
-	// {
-	// 	if (!Yii::$app->user->isGuest) {
-	// 		return false;
-	// 	}
-
-	// 	$this->layout = 'main';
-	// 	$this->viewPath = Yii::getAlias('@accountView');
-
-	// 	$model = new LoginForm();
- //        if ($model->load(Yii::$app->request->post()) && $model->login()) {
- //            return true;
- //        } else {
- //            return $this->render('auth/index', [
- //                'model' => $model,
- //            ]);
- //        }
- // 	}
+	/**
+     * Get CSRF token for login
+     * @return string the CSRF token
+     */
+    public function actionCsrf()
+    {
+        return Yii::$app->request->getCsrfToken();
+    }
 
  	/**
      * Login method for users

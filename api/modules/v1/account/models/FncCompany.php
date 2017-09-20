@@ -47,7 +47,7 @@ class FncCompany extends ActiveRecord
      * This is where tables are initialized. All required tables should be added here.
      * @return Boolean
      */
-    public function initCompanyTables()
+    public function initTables()
     {
         // Initialize company data table
         return $this->createMainTableSchema();

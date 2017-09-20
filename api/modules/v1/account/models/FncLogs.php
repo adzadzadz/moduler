@@ -53,7 +53,7 @@ class FncLogs extends ActiveRecord
      * This is where tables are initialized. All required tables should be added here.
      * @return Boolean
      */
-    public function initLogsTables()
+    public function initTables()
     {
         return $this->createCompanyLogsTable();
     }

@@ -54,7 +54,7 @@ class FncUser extends ActiveRecord implements IdentityInterface
      * This is where tables are initialized. All required tables should be added here.
      * @return Boolean
      */
-    public function initUserTables()
+    public function initTables()
     {
         return $this->createUserTableSchema();
     }
@@ -69,13 +69,6 @@ class FncUser extends ActiveRecord implements IdentityInterface
             'password_hash' => Schema::TYPE_STRING . ' NOT NULL',
             'password_reset_token' => Schema::TYPE_STRING,
             'email' => Schema::TYPE_STRING . ' NOT NULL',
-
-            'firstname' => Schema::TYPE_STRING . ' NOT NULL',
-            'middlename' => Schema::TYPE_STRING . ' NOT NULL',
-            'lastname' => Schema::TYPE_STRING . ' NOT NULL',
-            'mobile' => Schema::TYPE_INTEGER . ' NOT NULL',
-            'phone' => Schema::TYPE_INTEGER . ' NOT NULL',
-            'role' => Schema::TYPE_STRING . ' NOT NULL',
 
             'ipaddress' => Schema::TYPE_STRING . ' NOT NULL',
 

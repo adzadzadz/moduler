@@ -6,16 +6,6 @@ use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use yii\base\Model;
 use yii\web\Session;
-use api\modules\v1\account\models\GlbUser;
-use api\modules\v1\account\models\TmpUser;
-use common\models\Fnc;
-use common\models\FncCompany as Company;
-use common\models\FncConfig as Config;
-use common\models\FncLogs as Logs;
-use common\models\FncUser as User;
-use common\models\TmpCompany;
-use common\models\GlbCompany;
-use common\models\GlbUserToken;
 
 class SignupForm extends ActiveRecord
 {
@@ -214,19 +204,14 @@ class SignupForm extends ActiveRecord
             // $glbCompany = GlbCompany::findOne(['company_id' => $this->company_id]);
             $glbUser = GlbUser::getUserData($tmpUser->username);
 
-            $user = new User;
+            $user = new FncUser;
             $user->company_id = $this->company_id;
             $user->ipaddress = $tmpUser->_ipaddress;
             $user->username = $tmpUser->username;
             $user->email = $tmpUser->email;
             $user->password_hash = $tmpUser->password_hash;
             $user->auth_key = $tmpUser->auth_key;
-            $user->firstname = $tmpUser->firstname;
-            $user->middlename = $tmpUser->middlename;
-            $user->lastname = $tmpUser->lastname;
-            // $user->mobile = $tmpUser->mobile;
-            // $user->phone = $tmpUser->phone;
-            $user->status = User::STATUS_ACTIVE;
+            $user->status = FncUser::STATUS_ACTIVE;
             // $user->role = 'admin';
             $user->verification_code = $tmpUser->verification_code;
 
@@ -234,7 +219,7 @@ class SignupForm extends ActiveRecord
             // finding company_id 1 as currently only one company is registered
             $tmpCompany = TmpCompany::findOne(1);
 
-            $company = new Company;
+            $company = new FncCompany;
             $company->id = $tmpCompany->id;
             $company->name = $tmpCompany->name;
             $company->address = $tmpCompany->address;
@@ -254,7 +239,18 @@ class SignupForm extends ActiveRecord
 
             if ($user->save() && $company->save()) {
 
-                $config = new Config;
+                 // Set user meta
+                $userMeta = new FncUserMeta;
+                $userMeta->user_id = $user->id;
+                $userMeta->firstname = $tmpUser->firstname;
+                $userMeta->middlename = $tmpUser->middlename;
+                $userMeta->lastname = $tmpUser->lastname;
+                // $userMeta->mobile = $tmpUser->mobile;
+                // $userMeta->phone = $tmpUser->phone;
+                $userMeta->save();
+
+
+                $config = new FncConfig;
                 $config->user_id = $user->id;
                 $config->type = 'userDefaults';
                 $config->name = 'language';
@@ -268,12 +264,12 @@ class SignupForm extends ActiveRecord
                         'db' => $selected_user_db,
                     ],
                 ];
-                $glbUser[0]->user_id = $user->id;
-                $glbUser[0]->status = User::STATUS_ACTIVE;
-                $glbCompany = $glbUser[0]['company'][0];
+                $glbUser->user_id = $user->id;
+                $glbUser->status = FncUser::STATUS_ACTIVE;
+                $glbCompany = $glbUser['company'];
                 $glbCompany->db = $selected_user_db;
 
-                if ($glbCompany->save() && $glbUser[0]->save() && Yii::$app->db_rep->replicateGlobalData($replicateData, false)) {
+                if ($glbCompany->save() && $glbUser->save() && Yii::$app->db_rep->replicateGlobalData($replicateData, false)) {
                     // Assign super admim role to the company owner
                     $auth = Yii::$app->getAuthManager();
                     $role = $auth->getRole('superadmin');
@@ -296,7 +292,7 @@ class SignupForm extends ActiveRecord
             $this->region = $glbUserData->region;
 
             // Store FNC data first
-            $user = new User;
+            $user = new FncUser;
             $user->company_id = $this->company_id;
             $user->ipaddress = Yii::$app->getRequest()->getUserIP();
             $user->username = $this->username;
@@ -308,7 +304,7 @@ class SignupForm extends ActiveRecord
             $user->lastname = '';
             // $user->mobile = $tmpUser->mobile;
             // $user->phone = $tmpUser->phone;
-            $user->status = User::STATUS_ACTIVE;
+            $user->status = FncUser::STATUS_ACTIVE;
             // $user->role = 'admin';
             $user->verification_code = Yii::$app->security->generateRandomString(15);
 

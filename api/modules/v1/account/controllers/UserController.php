@@ -248,36 +248,4 @@ class UserController extends \yii\rest\ActiveController
         
         return false;
     }
-
-    /**
-     * Manually typed verification is accessed through ajax
-     */
-    public function actionActivate()
-    {   
-        if (isset(Yii::$app->request->post()['code'])) {
-            $code = Yii::$app->request->post()['code'];
-            $user = new TmpUser();
-            $userData = $user->getUser();
-
-            $glbUser = GlbUser::getUserData($userData->username);
-            $glbCompany = $glbUser[0]['company'][0];
-            
-            if ( $userData->status !== TmpUser::STATUS_ACTIVE ) {
-                if ($code === $userData->verification_code) {
-                
-                    $glbUser[0]->status = TmpUser::STATUS_VERIFIED;
-                    $userData->status = TmpUser::STATUS_VERIFIED;
-
-                    if ($userData->save() && $glbUser[0]->save()) {
-                        return true;
-                    }
-                }
-            } else {
-                return 'done';
-            }
-        }
-        return false;
-        // throw new \yii\web\NotFoundHttpException('Page not found', 404);
-    }
-
 }
