@@ -70,8 +70,8 @@ return [
         'accounts' => [
             'class' => 'api\modules\v1\account\Module',
         ],
-        'admin' => [
-            'class' => 'api\modules\admin\Admin'
+        'mlm' => [
+            'class' => 'api\modules\mlm\Module'
         ]
     ],
     'params' => $params,
