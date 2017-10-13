@@ -1,11 +1,11 @@
 <?php
 
-namespace modules\v1\account\models\rbac;
+namespace api\modules\v1\account\models\rbac;
 
 use Yii;
 use yii\base\Model;
-use modules\v1\account\models\rbac\AuthItem;
-use modules\v1\account\models\rbac\AuthAssignment;
+use api\modules\v1\account\models\rbac\AuthItem;
+use api\modules\v1\account\models\rbac\AuthAssignment;
 
 class Rbac extends Model
 {

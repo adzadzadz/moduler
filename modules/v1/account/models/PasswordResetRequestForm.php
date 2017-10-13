@@ -1,10 +1,9 @@
 <?php
-namespace modules\v1\account\models;
+namespace api\modules\v1\account\models;
 
 use Yii;
-use modules\v1\account\models\FncUser as User;
+use api\modules\v1\account\models\FncUser as User;
 use yii\base\Model;
-use common\models\GlbUser;
 
 /**
  * Password reset request form
@@ -24,9 +23,9 @@ class PasswordResetRequestForm extends Model
             [['username'], 'required'],
             [['username'], 'email'],
             ['username', 'exist',
-                'targetClass' => '\common\models\GlbUser',
+                'targetClass' => '\api\modules\v1\account\models\GlbUser',
                 // 'filter' => ['status' => User::STATUS_ACTIVE],
-                'message' => 'There is no user with such email.'
+                'message' => "Email doesn't exist"
             ],
         ];
     }

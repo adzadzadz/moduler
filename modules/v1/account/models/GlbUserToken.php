@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\v1\account\models;
+namespace api\modules\v1\account\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -77,8 +77,8 @@ class GlbUserToken extends \yii\db\ActiveRecord
                 'company_id' => $userToken->company_id, 
                 'user_id' => $userToken->user_id
             ]);
-            Yii::$app->strepzConfig->setIsTempUser($glbUser->status);
-            Yii::$app->strepzConfig->setCompanyId($glbUser->company_id);
+            Yii::$app->config->setIsTempUser($glbUser->status);
+            Yii::$app->config->setCompanyId($glbUser->company_id);
             return true;
         }
         return false;

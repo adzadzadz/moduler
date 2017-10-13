@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\v1\account\models;
+namespace api\modules\v1\account\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -29,7 +29,7 @@ class FncConfig extends ActiveRecord
 
     public static function tableName()
     {
-        return '{{%' . Yii::$app->strepzConfig->company_id . '_config}}';
+        return '{{%' . Yii::$app->config->company_id . '_config}}';
     }
 
     public function behaviors()
@@ -123,7 +123,7 @@ class FncConfig extends ActiveRecord
      * This is where tables are initialized. All required tables should be added here.
      * @return Boolean
      */
-    public function initConfigTables()
+    public function initTables()
     {
         return $this->createCompanyConfigTable();
     }
@@ -144,9 +144,9 @@ class FncConfig extends ActiveRecord
         ])->execute();
 
         $db->createCommand()->addForeignKey( 
-            'fk_' . Yii::$app->strepzConfig->company_id . '_config_user_id', 
-            '{{%' . Yii::$app->strepzConfig->company_id . '_config}}', 
-            'user_id', '{{%' . Yii::$app->strepzConfig->company_id . 
+            'fk_' . Yii::$app->config->company_id . '_config_user_id', 
+            '{{%' . Yii::$app->config->company_id . '_config}}', 
+            'user_id', '{{%' . Yii::$app->config->company_id . 
             '_user}}', 
             'id', 
             $delete = 'CASCADE', 

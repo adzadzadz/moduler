@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\v1\account\models;
+namespace api\modules\v1\account\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -25,7 +25,7 @@ class TmpCompany extends ActiveRecord
 
     public static function tableName()
     {
-        return '{{%' . Yii::$app->strepzConfig->company_id . '_company}}';
+        return '{{%' . Yii::$app->config->company_id . '_company}}';
     }
 
     public function behaviors()

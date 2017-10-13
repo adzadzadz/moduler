@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\v1\account\models\rbac\rule;
+namespace api\modules\v1\account\models\rbac\rule;
 
 use yii\rbac\Rule;
 

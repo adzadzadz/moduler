@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\v1\account\models;
+namespace api\modules\v1\account\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -30,7 +30,7 @@ class FncRbac extends Model
      * This is where tables are initialized. All required tables should be added here.
      * @return Boolean
      */
-    public function initRbacTables()
+    public function initTables()
     {        
         return $this->createRbacTables();
     }
@@ -38,10 +38,10 @@ class FncRbac extends Model
     private function createRbacTables()
     {
         $authManager = Yii::$app->getAuthManager();
-        $authManager->ruleTable = '{{%' . Yii::$app->strepzConfig->company_id . '_auth_rule}}';
-        $authManager->itemTable = '{{%' . Yii::$app->strepzConfig->company_id . '_auth_item}}';
-        $authManager->itemChildTable = '{{%' . Yii::$app->strepzConfig->company_id . '_auth_item_child}}';
-        $authManager->assignmentTable = '{{%' . Yii::$app->strepzConfig->company_id . '_auth_assignment}}';
+        $authManager->ruleTable = '{{%' . Yii::$app->config->company_id . '_auth_rule}}';
+        $authManager->itemTable = '{{%' . Yii::$app->config->company_id . '_auth_item}}';
+        $authManager->itemChildTable = '{{%' . Yii::$app->config->company_id . '_auth_item_child}}';
+        $authManager->assignmentTable = '{{%' . Yii::$app->config->company_id . '_auth_assignment}}';
 
         $db = $this->getDb();
 
@@ -83,7 +83,7 @@ class FncRbac extends Model
             'FOREIGN KEY (item_name) REFERENCES ' . $authManager->itemTable . ' (name) ON DELETE CASCADE ON UPDATE CASCADE',
         ])->execute();
 
-        $superadmin = \modules\v1\account\models\rbac\Rbac::initRoles($authManager);
+        $superadmin = \api\modules\v1\account\models\rbac\Rbac::initRoles($authManager);
         return true;
     }
 }

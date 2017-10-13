@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\v1\account\models\replication;
+namespace api\modules\v1\account\models\replication;
 
 use Yii;
 use common\components\DbDataReplicator;

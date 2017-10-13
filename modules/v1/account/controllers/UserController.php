@@ -1,5 +1,5 @@
 <?php
-namespace modules\v1\account;
+namespace api\modules\v1\account\controllers;
 
 use Yii;
 use yii\filters\auth\CompositeAuth;
@@ -8,10 +8,10 @@ use yii\helpers\ArrayHelper;
 use yii\filters\auth\QueryParamAuth;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use common\components\authclient\StrepzHttpBearerAuth;
-use modules\v1\account\models\TmpUser;
-use modules\v1\account\models\GlbUser;
-use modules\v1\account\models\Fetcher;
+use api\modules\v1\account\components\authclient\StrepzHttpBearerAuth;
+use api\modules\v1\account\models\TmpUser;
+use api\modules\v1\account\models\GlbUser;
+use api\modules\v1\account\models\Fetcher;
 
 /**
  * User controller
@@ -19,7 +19,7 @@ use modules\v1\account\models\Fetcher;
  */
 class UserController extends \yii\rest\ActiveController
 {
-    public $modelClass = 'modules\v1\account\models\FncUser';
+    public $modelClass = 'api\modules\v1\account\models\FncUser';
 
     public function behaviors()
     {
@@ -33,7 +33,7 @@ class UserController extends \yii\rest\ActiveController
             ],
             'authenticator' => [
                 'class' => CompositeAuth::className(),
-                'except' => ['options'],
+                'except' => ['options', 'index'],
                 'authMethods' => [
                     HttpBasicAuth::className(),
                     StrepzHttpBearerAuth::className(),
@@ -51,9 +51,20 @@ class UserController extends \yii\rest\ActiveController
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['get-me', 'index', 'activate', 'view'],
+                        'actions' => ['index', 'activate', 'view'],
                         'roles' => ['@'],
                     ],
+                    // [
+                    //     'allow' => true,
+                    //     'actions' => ['index'],
+                    //     'roles' => ['?'],
+                    // ],
+                ],
+            ],
+            'verbs' => [
+                'class' => \yii\filters\VerbFilter::className(),
+                'actions' => [
+                    'view' => ['GET', 'HEAD']
                 ],
             ],
         ]);
@@ -75,8 +86,9 @@ class UserController extends \yii\rest\ActiveController
      */
     public function actionIndex()
     {
+        throw new NotFoundHttpException;
         $data = [];
-        $list = \frontend\models\FncUser::find()
+        $list = \api\modules\v1\account\models\FncUser::find()
             ->where(['!=', 'id', Yii::$app->user->id])
             ->joinWith('authAssignment')
             ->all();
@@ -85,7 +97,7 @@ class UserController extends \yii\rest\ActiveController
         foreach ($list as $user) {
             $roles = [];
             foreach ($user->authAssignment as $assigned) {
-                if ($assigned->project_id === Yii::$app->strepzConfig->selectedProject) {
+                if ($assigned->project_id === Yii::$app->config->selectedProject) {
                     $roles[] = $assigned->item_name;    
                 }
             }
@@ -115,7 +127,7 @@ class UserController extends \yii\rest\ActiveController
     private function getMe()
     {   
         $userData = [];
-        if (Yii::$app->strepzConfig->isTempUser) {
+        if (Yii::$app->config->isTempUser) {
             $user = TmpUser::findOne(Yii::$app->user->id);
             $user = [
                 'info' => [
@@ -135,11 +147,11 @@ class UserController extends \yii\rest\ActiveController
         } else {
             $user = Fetcher::getUser(Yii::$app->user->id);
         }
-        return [
+        return Yii::$app->restTemplate->success([
             'isLogged' => true,
-            'isVerified' => !Yii::$app->strepzConfig->isTempUser,
+            'isVerified' => !Yii::$app->config->isTempUser,
             'user' => $user,
-        ];
+        ]);
     }
 
     /**
@@ -165,49 +177,14 @@ class UserController extends \yii\rest\ActiveController
             }
         }
 
+        if ($id > 0) {
+            throw new NotFoundHttpException;
+        }
+
         // If no data is passed, 
-        if (!Yii::$app->user->isGuest && $id == 'self') {
+        if (!Yii::$app->user->isGuest && $id == 0) {
             return $this->getMe();
         }
-
-        // Business as usual
-        // Method requires review
-        /* 
-        $data = [];
-        if (is_null($id)) {
-            $list = \frontend\models\FncUser::find()
-                ->where(['!=', 'id', Yii::$app->user->id])
-                ->joinWith('authAssignment')
-                ->all();
-
-            // Format
-            foreach ($list as $user) {
-                $roles = [];
-                foreach ($user->authAssignment as $assigned) {
-                    if ($assigned->project_id === Yii::$app->strepzConfig->selectedProject) {
-                        $roles[] = $assigned->item_name;    
-                    }
-                }
-
-                $data[] = [
-                    'info' => [
-                        // 'company_id' => $user->_company_id,
-                        'id' => $user->id,
-                        'email' => $user->email,
-                        'firstname' => $user->firstname,
-                        'middlename' => $user->middlename,
-                        'lastname' => $user->lastname,
-                        'status' => $user->status,
-                    ],
-                    'roles' => $roles
-                ];
-            }
-        } else {
-            $data = Fetcher::getUser($id);
-        }
-
-        return $data;
-        */
     }
 
     /**
@@ -216,7 +193,7 @@ class UserController extends \yii\rest\ActiveController
      */
     public function actionCreate()
     {
-        $model = new \frontend\models\SignupForm;
+        $model = new \api\modules\v1\account\models\SignupForm;
 
         if ($updatedPostArray = Yii::$app->request->post()) {
             // Set random password to be sent through email
@@ -226,10 +203,10 @@ class UserController extends \yii\rest\ActiveController
 
         if ($model->load($updatedPostArray) && $user = $model->invite()) {
 
-            $userProject = new \modules\v1\account\models\FncUserProject;
+            $userProject = new \api\modules\v1\account\models\FncUserProject;
 
             $userProject->user_id = $user->id;
-            $userProject->project_id = Yii::$app->strepzConfig->selectedProject;
+            $userProject->project_id = Yii::$app->config->selectedProject;
 
             if ($userProject->save() && $model->sendInvitation($user->email, $pwd, $user->firstname . " " . $user->lastname)) {
                 return Fetcher::filterUserData($user);
@@ -238,36 +215,4 @@ class UserController extends \yii\rest\ActiveController
         
         return false;
     }
-
-    /**
-     * Manually typed verification is accessed through ajax
-     */
-    public function actionActivate()
-    {   
-        if (isset(Yii::$app->request->post()['code'])) {
-            $code = Yii::$app->request->post()['code'];
-            $user = new TmpUser();
-            $userData = $user->getUser();
-
-            $glbUser = GlbUser::getUserData($userData->username);
-            $glbCompany = $glbUser[0]['company'][0];
-            
-            if ( $userData->status !== TmpUser::STATUS_ACTIVE ) {
-                if ($code === $userData->verification_code) {
-                
-                    $glbUser[0]->status = TmpUser::STATUS_VERIFIED;
-                    $userData->status = TmpUser::STATUS_VERIFIED;
-
-                    if ($userData->save() && $glbUser[0]->save()) {
-                        return true;
-                    }
-                }
-            } else {
-                return 'done';
-            }
-        }
-        return false;
-        // throw new \yii\web\NotFoundHttpException('Page not found', 404);
-    }
-
 }

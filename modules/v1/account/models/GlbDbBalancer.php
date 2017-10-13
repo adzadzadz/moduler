@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\v1\account\models;
+namespace api\modules\v1\account\models;
 
 use Yii;
 
@@ -45,7 +45,7 @@ class GlbDbBalancer extends \yii\db\ActiveRecord
             [['db_load_limit', 'db_current_load', 'status'], 'integer'],
             ['db_id', 'string', 'max' => 255],
 
-            ['db_id', 'unique', 'targetClass' => '\modules\v1\account\models\GlbDbBalancer', 'message' => 'This Db ID is already in use'],
+            ['db_id', 'unique', 'targetClass' => '\api\modules\v1\account\models\GlbDbBalancer', 'message' => 'This Db ID is already in use'],
         ];
     }
 

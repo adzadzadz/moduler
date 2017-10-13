@@ -1,5 +1,5 @@
 <?php
-namespace modules\v1\account;
+namespace api\modules\v1\account\controllers;
 
 use Yii;
 use yii\filters\auth\CompositeAuth;
@@ -63,10 +63,10 @@ class CompanyController extends ActiveController
     public function actionGetInfo()
     {
         if (!Yii::$app->user->isGuest) {
-            if (Yii::$app->strepzConfig->isTempUser) {
-                $company = \modules\v1\account\models\TmpCompany::findOne(1);
+            if (Yii::$app->config->isTempUser) {
+                $company = \api\modules\v1\account\models\TmpCompany::findOne(1);
             } else {
-                $company = \modules\v1\account\models\FncCompany::findOne(1);
+                $company = \api\modules\v1\account\models\FncCompany::findOne(1);
             }
             return [
                 'name' => $company->name,

@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\v1\account\models\rbac;
+namespace api\modules\v1\account\models\rbac;
 
 use Yii;
 
@@ -28,7 +28,7 @@ class AuthItem extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%' . Yii::$app->strepzConfig->company_id . '_auth_item}}';
+        return '{{%' . Yii::$app->config->company_id . '_auth_item}}';
     }
 
     public static function getDb()

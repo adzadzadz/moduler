@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\v1\account\models\rbac;
+namespace api\modules\v1\account\models\rbac;
 
 use Yii;
 
@@ -20,7 +20,7 @@ class AuthAssignment extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%' . Yii::$app->strepzConfig->company_id . '_auth_assignment}}';
+        return '{{%' . Yii::$app->config->company_id . '_auth_assignment}}';
     }
 
     public static function getDb()

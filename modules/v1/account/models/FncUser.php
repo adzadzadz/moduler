@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\v1\account\models;
+namespace api\modules\v1\account\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -32,7 +32,7 @@ class FncUser extends ActiveRecord implements IdentityInterface
 
     public static function tableName()
     {
-        return '{{%' . Yii::$app->strepzConfig->company_id . '_user}}';
+        return '{{%' . Yii::$app->config->company_id . '_user}}';
     }
 
     public function behaviors()
@@ -54,7 +54,7 @@ class FncUser extends ActiveRecord implements IdentityInterface
      * This is where tables are initialized. All required tables should be added here.
      * @return Boolean
      */
-    public function initUserTables()
+    public function initTables()
     {
         return $this->createUserTableSchema();
     }
@@ -69,13 +69,6 @@ class FncUser extends ActiveRecord implements IdentityInterface
             'password_hash' => Schema::TYPE_STRING . ' NOT NULL',
             'password_reset_token' => Schema::TYPE_STRING,
             'email' => Schema::TYPE_STRING . ' NOT NULL',
-
-            'firstname' => Schema::TYPE_STRING . ' NOT NULL',
-            'middlename' => Schema::TYPE_STRING . ' NOT NULL',
-            'lastname' => Schema::TYPE_STRING . ' NOT NULL',
-            'mobile' => Schema::TYPE_INTEGER . ' NOT NULL',
-            'phone' => Schema::TYPE_INTEGER . ' NOT NULL',
-            'role' => Schema::TYPE_STRING . ' NOT NULL',
 
             'ipaddress' => Schema::TYPE_STRING . ' NOT NULL',
 
@@ -117,7 +110,7 @@ class FncUser extends ActiveRecord implements IdentityInterface
 
             if ($this->_fncUser === false) {
                 // Yii::$app->session->set('company_id', $company_id);
-                Yii::$app->strepzConfig->setCompanyId($company_id);
+                Yii::$app->config->setCompanyId($company_id);
                 $this->_fncUser = User::findByUsername($this->username);
             }
         }
@@ -127,7 +120,7 @@ class FncUser extends ActiveRecord implements IdentityInterface
 
     public function getAuthAssignment()
     {
-        return $this->hasMany(\modules\v1\account\models\rbac\AuthAssignment::className(), ['user_id' => 'id']);
+        return $this->hasMany(\api\modules\v1\account\models\rbac\AuthAssignment::className(), ['user_id' => 'id']);
     }
 
     public function checkTable($tableName)
@@ -152,7 +145,7 @@ class FncUser extends ActiveRecord implements IdentityInterface
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        $userToken = \modules\v1\account\models\GlbUserToken::findOne(['token' => $token]);
+        $userToken = \api\modules\v1\account\models\GlbUserToken::findOne(['token' => $token]);
         return static::findOne(['id' => $userToken->user_id]);
     }
 

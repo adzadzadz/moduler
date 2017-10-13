@@ -1,5 +1,5 @@
 <?php
-namespace modules\v1\account\models;
+namespace api\modules\v1\account\models;
 
 use Yii;
 use yii\base\Model;
@@ -42,7 +42,7 @@ class LoginForm extends Model
     public function validatePassword($attribute, $params)
     {
         if (!$this->hasErrors()) {
-            if (Yii::$app->strepzConfig->isTempUser === true) {
+            if (Yii::$app->config->isTempUser === true) {
                 $user = $this->getTmpUser();
             } else {
                 $user = $this->getUser();
@@ -83,7 +83,7 @@ class LoginForm extends Model
             Yii::$app->session->set('fnc_db', $db_linked);
             Yii::$app->session->set('company_id', $company_id);
 
-            Yii::$app->strepzConfig->reloadCompanyId();
+            Yii::$app->config->reloadCompanyId();
             if ($this->_fncUser === false) {
                 $this->_fncUser = FncUser::findByUsername($this->username);
             }
@@ -91,17 +91,6 @@ class LoginForm extends Model
         
         return $this->_fncUser;
     }
-
-    // public function registrationAutoLogin($username)
-    // {
-    //     $this->username = $username;
-    //     Yii::$app->session->set('user_temp_mode', false);
-    //     if (!Yii::$app->user->isGuest) {
-    //         return true;
-    //     } else {
-    //         return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);    
-    //     }        
-    // }
 
     // TEMPORARY USER STUFF
     public function tmpLogin($company_id, $user_id)
@@ -122,15 +111,6 @@ class LoginForm extends Model
         }
         return $this->_tmpUser;
     }
-
-    // public function registrationTmpUserAutoLogin($username)
-    // {
-    //     $this->username = $username;
-    //     // VERY IMPORTANT TO USE TEMPORARY DB FOR LOGGING
-    //     Yii::$app->user->identityClass = 'modules\v1\account\models\TmpUser';
-    //     Yii::$app->session->set('user_temp_mode', true);
-    //     return Yii::$app->user->login($this->getTmpUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
-    // }
 
     public function attributeLabels()
     {

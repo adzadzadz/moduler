@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\v1\account\models;
+namespace api\modules\v1\account\models;
 
 use Yii;
 use yii\base\Model;
@@ -8,7 +8,7 @@ use yii\db\ActiveRecord;
 use yii\db\ActiveQuery;
 use yii\db\Command;
 use yii\db\Schema;
-use modules\v1\account\models\GlbDbBalancer;
+use api\modules\v1\account\models\GlbDbBalancer;
 
 
 class StrepzDbManager extends ActiveRecord

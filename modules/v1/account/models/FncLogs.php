@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\v1\account\models;
+namespace api\modules\v1\account\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -26,7 +26,7 @@ class FncLogs extends ActiveRecord
 
     public static function tableName()
     {
-        return '{{%' . Yii::$app->strepzConfig->company_id . '_logs}}';
+        return '{{%' . Yii::$app->config->company_id . '_logs}}';
     }
 
     public function behaviors()
@@ -53,7 +53,7 @@ class FncLogs extends ActiveRecord
      * This is where tables are initialized. All required tables should be added here.
      * @return Boolean
      */
-    public function initLogsTables()
+    public function initTables()
     {
         return $this->createCompanyLogsTable();
     }

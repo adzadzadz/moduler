@@ -1,5 +1,5 @@
 <?php
-namespace modules\v1\account;
+namespace api\modules\v1\account\controllers;
 
 use Yii;
 use yii\filters\auth\CompositeAuth;
@@ -10,15 +10,15 @@ use yii\rest\ActiveController;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\Url;
-use modules\v1\account\models\Company;
-use modules\v1\account\models\GlbUserCompany;
-use modules\v1\account\models\rbac\AuthItem;
-use modules\v1\account\models\FncUser;
+use api\modules\v1\account\models\Company;
+use api\modules\v1\account\models\GlbUserCompany;
+use api\modules\v1\account\models\rbac\AuthItem;
+use api\modules\v1\account\models\FncUser;
 use yii\helpers\ArrayHelper;
 
 class RbacController extends ActiveController
 {
-    public $modelClass = 'modules\v1\account\models\rbac\AuthAssignment';
+    public $modelClass = 'api\modules\v1\account\models\rbac\AuthAssignment';
 
     public function behaviors()
     {
@@ -134,7 +134,7 @@ class RbacController extends ActiveController
 
     // public function actionRunPermission()
     // {
-    //     $rbac = new \modules\v1\account\models\rbac\Rbac;
+    //     $rbac = new \api\modules\v1\account\models\rbac\Rbac;
     //     $rbac->projectPermissions();
 
     //     return 'adz';

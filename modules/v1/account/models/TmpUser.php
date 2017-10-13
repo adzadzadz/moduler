@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\v1\account\models;
+namespace api\modules\v1\account\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -32,7 +32,7 @@ class TmpUser extends ActiveRecord implements IdentityInterface
 
     public static function tableName()
     {
-        return '{{%' . Yii::$app->strepzConfig->company_id . '_user}}';
+        return '{{%' . Yii::$app->config->company_id . '_user}}';
     }
 
     public function behaviors()
@@ -53,8 +53,8 @@ class TmpUser extends ActiveRecord implements IdentityInterface
     public function deleteData()
     {
         $db = $this->getDb();
-        if ($db->schema->getTableSchema('{{%' . Yii::$app->strepzConfig->company_id . '_user}}') !== null) {
-            $db->createCommand()->dropTable('{{%' . Yii::$app->strepzConfig->company_id . '_user}}')->execute();
+        if ($db->schema->getTableSchema('{{%' . Yii::$app->config->company_id . '_user}}') !== null) {
+            $db->createCommand()->dropTable('{{%' . Yii::$app->config->company_id . '_user}}')->execute();
         }        
     }
 
@@ -70,22 +70,19 @@ class TmpUser extends ActiveRecord implements IdentityInterface
         return $user;
     }
 
-    public function getUser($username = null)
+    public static function getUser($username = null)
     {
-        if ($username !== null) {
-            $this->username = $username;
-        } else {
-            $this->username = Yii::$app->user->identity->username;
+        if (!Yii::$app->user->isGuest) {
+            $username = Yii::$app->user->identity->username;
         }
-        
-        $this->_glbUser = GlbUser::getUserData($this->username);
-        if ($this->_glbUser !== false) {
-            $company_id = $this->_glbUser['company']->company_id;
-            Yii::$app->strepzConfig->setCompanyId($company_id);
+        $glbUser = GlbUser::getUserData($username);
+        if ($glbUser !== false) {
+            $company_id = $glbUser['company']->company_id;
+            Yii::$app->config->setCompanyId($company_id);
 
-            $this->_tmpUser = TmpUser::findOne(['username' => $this->username]);
+            $tmpUser = TmpUser::findOne(['username' => $username]);
         }
-        return $this->_tmpUser;
+        return $tmpUser;
     }
 
     public static function findUserByRegistrationToken($username, $token)
@@ -155,7 +152,7 @@ class TmpUser extends ActiveRecord implements IdentityInterface
 
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        if ($userToken = \modules\v1\account\models\GlbUserToken::findOne(['token' => $token])) {
+        if ($userToken = \api\modules\v1\account\models\GlbUserToken::findOne(['token' => $token])) {
             return static::findOne(['_company_id' => $userToken->company_id, 'user_id' => $userToken->user_id]);
         }
         return null;

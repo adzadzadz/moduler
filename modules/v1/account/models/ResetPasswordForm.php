@@ -1,7 +1,7 @@
 <?php
-namespace modules\v1\account\models;
+namespace api\modules\v1\account\models;
 
-use modules\v1\account\models\FncUser as User;
+use api\modules\v1\account\models\FncUser as User;
 use yii\base\InvalidParamException;
 use yii\base\Model;
 use Yii;

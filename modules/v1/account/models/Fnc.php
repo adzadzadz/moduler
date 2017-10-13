@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\v1\account\models;
+namespace api\modules\v1\account\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -24,14 +24,16 @@ class Fnc extends ActiveRecord
         $logs    = new FncLogs();
         $rbac    = new FncRbac();
         $user    = new FncUser();
-        $project = new FncProject();
+        $userMeta = new FncUserMeta();
+        // $project = new FncProject();
 
-        if ( $logs->initLogsTables() && 
-             $company->initCompanyTables() && 
-             $user->initUserTables() &&
-             $rbac->initRbacTables() &&
-             $config->initConfigTables() &&
-             $project->initProjectTables()) {
+        if ( $logs->initTables() && 
+             $company->initTables() && 
+             $user->initTables() &&
+             $userMeta->initTables() &&
+             $rbac->initTables() &&
+             $config->initTables()) {
+             // $project->initProjectTables()
 
             return true;
         }
