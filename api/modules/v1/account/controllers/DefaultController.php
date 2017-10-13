@@ -10,7 +10,7 @@ use yii\rest\ActiveController;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
-use common\components\authclient\StrepzHttpBearerAuth;
+use api\modules\v1\account\components\authclient\StrepzHttpBearerAuth;
 use api\modules\v1\account\models\LoginForm;
 use api\modules\v1\account\models\SignupForm;
 use api\modules\v1\account\models\FncSignupForm;
@@ -39,7 +39,7 @@ class DefaultController extends ActiveController
             ],
             'authenticator' => [
                 'class' => CompositeAuth::className(),
-                'except' => ['options', 'login', 'signup', 'request-password-reset', 'verify-reset-token', 'reset-password'],
+                'except' => ['options', 'signup', 'request-password-reset', 'verify-reset-token', 'reset-password'],
                 'authMethods' => [
                     HttpBasicAuth::className(),
                     StrepzHttpBearerAuth::className(),
@@ -50,7 +50,6 @@ class DefaultController extends ActiveController
                 'class' => AccessControl::className(),
                 'only' => [
                     'update-info', 
-                    'login', 
                     'signup', 
                     'build', 
                     'request-password-reset', 
@@ -67,7 +66,6 @@ class DefaultController extends ActiveController
                     [
                         'allow' => true,
                         'actions' => [
-                            'login', 
                             'signup', 
                             'request-password-reset', 
                             'verify-reset-token', 
@@ -80,10 +78,10 @@ class DefaultController extends ActiveController
             'verbs' => [
                 'class' => \yii\filters\VerbFilter::className(),
                 'actions' => [
-                    'request-password-reset'  => ['post'],
-                    'login'   => ['post', 'get'],
-                    'signup' => ['post'],
-                    'verify-reset-token' => ['post']
+                    'request-password-reset'  => ['POST'],
+                    'signup' => ['POST'],
+                    'verify-reset-token' => ['GET'],
+                    'reset-password' => ['PUT', 'PATCH']
                 ],
             ],
         ]);
@@ -112,26 +110,19 @@ class DefaultController extends ActiveController
             $data['SignupForm']['username'] = $data['SignupForm']['email'];
         }
 
-        // force validate to show errors if load data fails
-        $model->validate();
-
         if ($model->load($data)) {
             if ($user = $model->tmpSignup()) {
                 if (SignupForm::sendVerificationEmail($user->username, $user->email, $user->firstname . ' ' . $user->lastname, $user->verification_code)) {
                     // Fetch user token from global user_token table
                     $token = \api\modules\v1\account\models\GlbUserToken::getToken($user->_company_id, $user->user_id);
-                    return [
-                            'success' => true,
-                            'content' => [
-                                'type' => 'Bearer',
-                                'token' => $token
-                            ]
-                        ];
+                    return Yii::$app->restTemplate->success([
+                        'type' => 'Bearer',
+                        'token' => $token
+                    ]);
                 }
-                return "it's actually a verification email error";
             }
         }
-        return ['error' => $model->getErrors()];
+        return Yii::$app->restTemplate->fail($model->validate() ? true : $model->getErrors(), 400, 'Bad Request');
     }
 
     /**
@@ -156,7 +147,7 @@ class DefaultController extends ActiveController
         $currentRegion = strtolower(Yii::$app->params['app_region']);
         $glbUser = GlbUser::getUserData($username);
         $glbUser =  $glbUser['company'];
-        Yii::$app->strepzConfig->setCompanyId($glbUser->company_id);
+        Yii::$app->config->setCompanyId($glbUser->company_id);
 
         if ($currentRegion === $glbUser->region) {
             $tmpUser = new TmpUser;
@@ -170,22 +161,16 @@ class DefaultController extends ActiveController
             if ($user) {
                 $signup = new SignupForm;
                 if ($setUser = $signup->signup($user->id)) {
-                    Yii::$app->strepzConfig->setIsTempUser($setUser->status);
+                    Yii::$app->config->setIsTempUser($setUser->status);
 
-                    return [
-                        'success' => true,
-                        'message' => 'User account has been succesfully built.'
-                    ];
+                    return Yii::$app->restTemplate->success(['message' => 'User account has been succesfully built.']);
                 }
             }
         } else {
             // Regions does not match, present a solution or display error
-            return [
-                'success' => false,
-                'error' => [
-                    'message' => 'The regions does not match. Please contact the administrator.'
-                ]
-            ];
+            return Yii::$app->restTemplate->fail([
+                'message' => 'The regions does not match. Please contact the administrator.'
+            ], 500, 'Internal Server Error');
         }
         throw new \yii\web\NotFoundHttpException('Page not found', 404);
     }
@@ -211,17 +196,11 @@ class DefaultController extends ActiveController
                     $userData->status = TmpUser::STATUS_VERIFIED;
 
                     if ($userData->save() && $glbUser->save()) {
-                        return [
-                            'success' => true,
-                            'message' => 'Account succesfully verified.'
-                        ];
+                        return Yii::$app->restTemplate->success(['message' => 'Account succesfully verified.']);
                     }
                 }
             } else {
-                return [
-                    'success' => true,
-                    'message' => 'Account is already verified.'
-                ];
+                return Yii::$app->restTemplate->success(['message' => 'Account is already verified.']);
             }
         }
         throw new \yii\web\NotFoundHttpException('Page not found', 404);
@@ -248,11 +227,12 @@ class DefaultController extends ActiveController
             $model->$key = $value;
 
             if ($model->save()) {
-                return true;
+                return Yii::$app->restTemplate->success(['message' => 'User information updated']);
             }
-            return false;
+            // Save failed
+            return Yii::$app->restTemplate->fail(null, 500, 'Internal Server Error');
         }
-        return false;
+        throw new \yii\web\NotFoundHttpException('Page not found', 404);
     }
 
     public function actionRequestPasswordReset()
@@ -262,32 +242,30 @@ class DefaultController extends ActiveController
         if (Yii::$app->request->post()) {
             $data = [
                 'PasswordResetRequestForm' => [
-                    'username' => Yii::$app->request->post()['PasswordResetRequestForm']['username'],
-                    'email'    => Yii::$app->request->post()['PasswordResetRequestForm']['username'],
+                    'username' => Yii::$app->request->post()['email'],
+                    'email'    => Yii::$app->request->post()['email'],
                 ]
             ];
         }
 
         if ($model->load($data) && $model->validate()) {
             if ($model->sendEmail()) {
-                return true;
+                return Yii::$app->restTemplate->success(['message' => 'The password reset link has been sent to your email']);
             } else {
-
+                return Yii::$app->restTemplate->fail(null, 500, 'Internal Server Error');
             }
         }
-
-        return false;
+        return Yii::$app->restTemplate->fail($model->validate() ? null : $model->getErrors(), 400, 'Bad Request');
     }
 
-    public function actionResetPassword($token, $u)
+    public function actionResetPassword($token, $email)
     {
         $model = new ResetPasswordForm;
 
-        if ($model->verifyToken($token, $u) && $model->load(Yii::$app->request->post()) && $model->validate() && $model->resetPassword()) {
-            return true;
+        if ($model->verifyToken($token, $email) && $model->load(['ResetPasswordForm' => Yii::$app->request->post()]) && $model->validate() && $model->resetPassword()) {
+            return Yii::$app->restTemplate->success(['message' => 'The password has been succesfully reset']);
         }
-
-        return false;
+        return Yii::$app->restTemplate->fail($model->validate() ? null : $model->getErrors(), 400, 'Bad Request');
     }
 
     /**
@@ -301,8 +279,8 @@ class DefaultController extends ActiveController
         $model = new ResetPasswordForm;
 
         if ($model->verifyToken($token, $email)) {
-            return true;
+            return Yii::$app->restTemplate->success(['message' => 'Token verified']);
         }
-        return false;
+        return Yii::$app->restTemplate->fail(null, 400, 'Bad Request');
     }
 }

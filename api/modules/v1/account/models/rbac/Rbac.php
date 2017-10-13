@@ -77,6 +77,7 @@ class Rbac extends Model
         if (!$rbac->setPorfolioPermissions()) return false;
         if (!$rbac->setSettingsPermissions()) return false;
 
+
         return $superadmin;
 	}
 

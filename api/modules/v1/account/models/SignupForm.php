@@ -66,13 +66,13 @@ class SignupForm extends ActiveRecord
             ['username', 'filter', 'filter' => 'trim'],
             ['username', 'required'],
             ['username', 'email'],
-            ['username', 'unique', 'targetClass' => '\common\models\GlbUser', 'message' => 'This username has already been taken.'],
+            ['username', 'unique', 'targetClass' => 'api\modules\v1\account\models\GlbUser', 'message' => 'This username has already been taken.'],
             ['username', 'string', 'min' => 6, 'max' => 255],
 
             // ['email', 'filter', 'filter' => 'trim'],
             ['email', 'required'],
             ['email', 'email'],
-            ['email', 'unique', 'targetClass' => '\common\models\FncUser', 'message' => 'This email address has already been taken.'],
+            ['email', 'unique', 'targetClass' => 'api\modules\v1\account\models\FncUser', 'message' => 'This email address has already been taken.'],
 
             ['region', 'default', 'value' => 'eu'],
 
@@ -286,7 +286,7 @@ class SignupForm extends ActiveRecord
     {
         if ($this->validate(['email'])) {
             // Set required data
-            $this->company_id = Yii::$app->strepzConfig->company_id;
+            $this->company_id = Yii::$app->config->company_id;
             $this->username = $this->email;
             $glbUserData = GlbCompany::findOne(['company_id' => $this->company_id]);
             $this->region = $glbUserData->region;
@@ -349,7 +349,7 @@ class SignupForm extends ActiveRecord
         if ($tmpTables->up()) {
             $this->company_id = $tmpTables->company_id;
         }
-        Yii::$app->strepzConfig->setCompanyId($this->company_id);
+        Yii::$app->config->setCompanyId($this->company_id);
         return $this->company_id;
     }
 

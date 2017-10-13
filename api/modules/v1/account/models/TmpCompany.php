@@ -25,7 +25,7 @@ class TmpCompany extends ActiveRecord
 
     public static function tableName()
     {
-        return '{{%' . Yii::$app->strepzConfig->company_id . '_company}}';
+        return '{{%' . Yii::$app->config->company_id . '_company}}';
     }
 
     public function behaviors()

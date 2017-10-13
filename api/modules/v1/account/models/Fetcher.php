@@ -4,8 +4,6 @@ namespace api\modules\v1\account\models;
 use Yii;
 use yii\base\Model;
 use api\modules\v1\account\models\FncUser;
-use common\models\FncUserProject as UserProject;
-use common\models\FncConfig;
 
 /**
  * Data Formatter for json receiver
@@ -21,10 +19,10 @@ class Fetcher extends Model
     {
         // Need to create new authManager object for better serving
         $authManager = Yii::$app->authManager;
-        $authManager->ruleTable = '{{%' . Yii::$app->strepzConfig->company_id . '_auth_rule}}';
-        $authManager->itemTable = '{{%' . Yii::$app->strepzConfig->company_id . '_auth_item}}';
-        $authManager->itemChildTable = '{{%' . Yii::$app->strepzConfig->company_id . '_auth_item_child}}';
-        $authManager->assignmentTable = '{{%' . Yii::$app->strepzConfig->company_id . '_auth_assignment}}';
+        $authManager->ruleTable = '{{%' . Yii::$app->config->company_id . '_auth_rule}}';
+        $authManager->itemTable = '{{%' . Yii::$app->config->company_id . '_auth_item}}';
+        $authManager->itemChildTable = '{{%' . Yii::$app->config->company_id . '_auth_item_child}}';
+        $authManager->assignmentTable = '{{%' . Yii::$app->config->company_id . '_auth_assignment}}';
         $authManager->db = Yii::$app->strepzDbManager->getFncDb();
 
         $user = FncUser::find()
@@ -46,7 +44,7 @@ class Fetcher extends Model
         $auth['permissions'] = $authManager->getPermissionsByUser(Yii::$app->user->id);
 
         // Find projects
-        $projects = UserProject::find()
+        $projects = FncUserProject::find()
             ->where(['user_id' => $id])
             ->joinWith('project')
             ->all();

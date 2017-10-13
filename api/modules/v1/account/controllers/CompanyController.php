@@ -63,7 +63,7 @@ class CompanyController extends ActiveController
     public function actionGetInfo()
     {
         if (!Yii::$app->user->isGuest) {
-            if (Yii::$app->strepzConfig->isTempUser) {
+            if (Yii::$app->config->isTempUser) {
                 $company = \api\modules\v1\account\models\TmpCompany::findOne(1);
             } else {
                 $company = \api\modules\v1\account\models\FncCompany::findOne(1);

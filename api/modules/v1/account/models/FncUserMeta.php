@@ -21,7 +21,7 @@ class FncUserMeta extends ActiveRecord
 
     public static function tableName()
     {
-        return '{{%' . Yii::$app->strepzConfig->company_id . '_user_meta}}';
+        return '{{%' . Yii::$app->config->company_id . '_user_meta}}';
     }
 
     public function rules()
@@ -59,7 +59,7 @@ class FncUserMeta extends ActiveRecord
             'fk_user_id', 
             $this->tablename(), 
             'user_id', 
-            '{{%' . Yii::$app->strepzConfig->company_id . '_user}}', 
+            '{{%' . Yii::$app->config->company_id . '_user}}', 
             'id', 
             $delete = 'CASCADE',
             $update = null );

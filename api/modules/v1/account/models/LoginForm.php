@@ -42,7 +42,7 @@ class LoginForm extends Model
     public function validatePassword($attribute, $params)
     {
         if (!$this->hasErrors()) {
-            if (Yii::$app->strepzConfig->isTempUser === true) {
+            if (Yii::$app->config->isTempUser === true) {
                 $user = $this->getTmpUser();
             } else {
                 $user = $this->getUser();
@@ -83,7 +83,7 @@ class LoginForm extends Model
             Yii::$app->session->set('fnc_db', $db_linked);
             Yii::$app->session->set('company_id', $company_id);
 
-            Yii::$app->strepzConfig->reloadCompanyId();
+            Yii::$app->config->reloadCompanyId();
             if ($this->_fncUser === false) {
                 $this->_fncUser = FncUser::findByUsername($this->username);
             }

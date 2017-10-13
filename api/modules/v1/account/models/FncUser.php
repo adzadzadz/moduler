@@ -32,7 +32,7 @@ class FncUser extends ActiveRecord implements IdentityInterface
 
     public static function tableName()
     {
-        return '{{%' . Yii::$app->strepzConfig->company_id . '_user}}';
+        return '{{%' . Yii::$app->config->company_id . '_user}}';
     }
 
     public function behaviors()
@@ -110,7 +110,7 @@ class FncUser extends ActiveRecord implements IdentityInterface
 
             if ($this->_fncUser === false) {
                 // Yii::$app->session->set('company_id', $company_id);
-                Yii::$app->strepzConfig->setCompanyId($company_id);
+                Yii::$app->config->setCompanyId($company_id);
                 $this->_fncUser = User::findByUsername($this->username);
             }
         }

@@ -49,7 +49,7 @@ class SiteController extends \yii\web\Controller
         $currentRegion = strtolower(Yii::$app->params['app_region']);
         $glbUser = GlbUser::getUserData($id);
         $glbUser =  $glbUser['company'];
-        Yii::$app->strepzConfig->setCompanyId($glbUser->company_id);
+        Yii::$app->config->setCompanyId($glbUser->company_id);
 
         if ($currentRegion === $glbUser->region) {
             $tmpUser = new TmpUser;
@@ -63,7 +63,7 @@ class SiteController extends \yii\web\Controller
             if ($user) {
                 $signup = new SignupForm;
                 if ($setUser = $signup->signup($user->id)) {
-                    Yii::$app->strepzConfig->setIsTempUser($setUser->status);
+                    Yii::$app->config->setIsTempUser($setUser->status);
 
                     if ($method == 'email') {
                         return $this->redirect('/');

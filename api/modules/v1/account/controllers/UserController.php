@@ -8,7 +8,7 @@ use yii\helpers\ArrayHelper;
 use yii\filters\auth\QueryParamAuth;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use common\components\authclient\StrepzHttpBearerAuth;
+use api\modules\v1\account\components\authclient\StrepzHttpBearerAuth;
 use api\modules\v1\account\models\TmpUser;
 use api\modules\v1\account\models\GlbUser;
 use api\modules\v1\account\models\Fetcher;
@@ -51,7 +51,7 @@ class UserController extends \yii\rest\ActiveController
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['get-me', 'index', 'activate', 'view'],
+                        'actions' => ['index', 'activate', 'view'],
                         'roles' => ['@'],
                     ],
                     // [
@@ -59,6 +59,12 @@ class UserController extends \yii\rest\ActiveController
                     //     'actions' => ['index'],
                     //     'roles' => ['?'],
                     // ],
+                ],
+            ],
+            'verbs' => [
+                'class' => \yii\filters\VerbFilter::className(),
+                'actions' => [
+                    'view' => ['GET', 'HEAD']
                 ],
             ],
         ]);
@@ -91,7 +97,7 @@ class UserController extends \yii\rest\ActiveController
         foreach ($list as $user) {
             $roles = [];
             foreach ($user->authAssignment as $assigned) {
-                if ($assigned->project_id === Yii::$app->strepzConfig->selectedProject) {
+                if ($assigned->project_id === Yii::$app->config->selectedProject) {
                     $roles[] = $assigned->item_name;    
                 }
             }
@@ -121,7 +127,7 @@ class UserController extends \yii\rest\ActiveController
     private function getMe()
     {   
         $userData = [];
-        if (Yii::$app->strepzConfig->isTempUser) {
+        if (Yii::$app->config->isTempUser) {
             $user = TmpUser::findOne(Yii::$app->user->id);
             $user = [
                 'info' => [
@@ -141,11 +147,11 @@ class UserController extends \yii\rest\ActiveController
         } else {
             $user = Fetcher::getUser(Yii::$app->user->id);
         }
-        return [
+        return Yii::$app->restTemplate->success([
             'isLogged' => true,
-            'isVerified' => !Yii::$app->strepzConfig->isTempUser,
+            'isVerified' => !Yii::$app->config->isTempUser,
             'user' => $user,
-        ];
+        ]);
     }
 
     /**
@@ -179,45 +185,6 @@ class UserController extends \yii\rest\ActiveController
         if (!Yii::$app->user->isGuest && $id == 0) {
             return $this->getMe();
         }
-
-        // Business as usual
-        // Method requires review
-        /* 
-        $data = [];
-        if (is_null($id)) {
-            $list = \api\modules\v1\account\models\FncUser::find()
-                ->where(['!=', 'id', Yii::$app->user->id])
-                ->joinWith('authAssignment')
-                ->all();
-
-            // Format
-            foreach ($list as $user) {
-                $roles = [];
-                foreach ($user->authAssignment as $assigned) {
-                    if ($assigned->project_id === Yii::$app->strepzConfig->selectedProject) {
-                        $roles[] = $assigned->item_name;    
-                    }
-                }
-
-                $data[] = [
-                    'info' => [
-                        // 'company_id' => $user->_company_id,
-                        'id' => $user->id,
-                        'email' => $user->email,
-                        'firstname' => $user->firstname,
-                        'middlename' => $user->middlename,
-                        'lastname' => $user->lastname,
-                        'status' => $user->status,
-                    ],
-                    'roles' => $roles
-                ];
-            }
-        } else {
-            $data = Fetcher::getUser($id);
-        }
-
-        return $data;
-        */
     }
 
     /**
@@ -239,7 +206,7 @@ class UserController extends \yii\rest\ActiveController
             $userProject = new \api\modules\v1\account\models\FncUserProject;
 
             $userProject->user_id = $user->id;
-            $userProject->project_id = Yii::$app->strepzConfig->selectedProject;
+            $userProject->project_id = Yii::$app->config->selectedProject;
 
             if ($userProject->save() && $model->sendInvitation($user->email, $pwd, $user->firstname . " " . $user->lastname)) {
                 return Fetcher::filterUserData($user);

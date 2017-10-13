@@ -11,7 +11,7 @@ use yii\rest\ActiveController;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
-use common\components\authclient\StrepzHttpBearerAuth;
+use api\modules\v1\account\components\authclient\StrepzHttpBearerAuth;
 use api\modules\v1\account\models\auth\AuthClient;
 use api\modules\v1\account\models\LoginForm;
 use api\modules\v1\account\models\SignupForm;
@@ -62,7 +62,7 @@ class AuthController extends Controller
                 'class' => \yii\filters\VerbFilter::className(),
                 'actions' => [
                     'login' => ['post'],
-                    'csrf' => ['head','get'],
+                    'csrf' => ['get','head'],
                 ],
             ],
         ]);
@@ -74,7 +74,7 @@ class AuthController extends Controller
      */
     public function actionCsrf()
     {
-        return Yii::$app->request->getCsrfToken();
+        return Yii::$app->restTemplate->success(Yii::$app->request->getCsrfToken());
     }
 
  	/**
@@ -96,20 +96,17 @@ class AuthController extends Controller
 
         if ($model->load($data)) {
             if($user = \api\modules\v1\account\models\GlbUser::getUserData($model->username)) {
-                Yii::$app->strepzConfig->setCompanyId($user->company_id);
+                Yii::$app->config->setCompanyId($user->company_id);
                 $userRegion = $user['company']->region;
                 $userStatus = $user->status;
                 // Workaround for unverified users
                 if ($userStatus !== GlbUser::STATUS_ACTIVE) {
-                    Yii::$app->strepzConfig->setIsTempUser($userStatus);
+                    Yii::$app->config->setIsTempUser($userStatus);
                     if ($token = $model->tmpLogin($user->company_id, $user->user_id)) {
-                        return [
-                            'success' => true,
-                            'content' => [
-                                'type' => 'Bearer',
-                                'token' => $token
-                            ]
-                        ];
+                        return Yii::$app->restTemplate->success([
+                            'type' => 'Bearer',
+                            'token' => $token
+                        ]);
                     }
                 }
                 // Requires strict refactoring
@@ -117,13 +114,10 @@ class AuthController extends Controller
                     if ($userRegion === $currentRegion) {
                         // return $this->goBack();
                         \api\modules\v1\account\models\FncConfig::selectProject(0);
-                        return [
-                            'success' => true,
-                            'content' => [
-                                'type' => 'Bearer',
-                                'token' => $token
-                            ]
-                        ];
+                        return Yii::$app->restTemplate->success([
+                            'type' => 'Bearer',
+                            'token' => $token
+                        ]);
                     } else {
                         if ($this->_auth_key = $model->getUser()->auth_key) {
                             $this->_username = $model->getUser()->username;
@@ -138,8 +132,6 @@ class AuthController extends Controller
             // This is just so the error shows up as it validates the user
             $model->addError('password', 'Incorrect username or password.');
         }
-
-        $model->validate();
-        return ['error' => $model->getErrors()];
+        return Yii::$app->restTemplate->fail($model->validate() ? true : $model->getErrors(), 403, 'Forbidden');
     }
 }

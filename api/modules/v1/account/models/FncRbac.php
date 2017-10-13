@@ -38,10 +38,10 @@ class FncRbac extends Model
     private function createRbacTables()
     {
         $authManager = Yii::$app->getAuthManager();
-        $authManager->ruleTable = '{{%' . Yii::$app->strepzConfig->company_id . '_auth_rule}}';
-        $authManager->itemTable = '{{%' . Yii::$app->strepzConfig->company_id . '_auth_item}}';
-        $authManager->itemChildTable = '{{%' . Yii::$app->strepzConfig->company_id . '_auth_item_child}}';
-        $authManager->assignmentTable = '{{%' . Yii::$app->strepzConfig->company_id . '_auth_assignment}}';
+        $authManager->ruleTable = '{{%' . Yii::$app->config->company_id . '_auth_rule}}';
+        $authManager->itemTable = '{{%' . Yii::$app->config->company_id . '_auth_item}}';
+        $authManager->itemChildTable = '{{%' . Yii::$app->config->company_id . '_auth_item_child}}';
+        $authManager->assignmentTable = '{{%' . Yii::$app->config->company_id . '_auth_assignment}}';
 
         $db = $this->getDb();
 

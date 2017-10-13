@@ -26,7 +26,7 @@ class FncLogs extends ActiveRecord
 
     public static function tableName()
     {
-        return '{{%' . Yii::$app->strepzConfig->company_id . '_logs}}';
+        return '{{%' . Yii::$app->config->company_id . '_logs}}';
     }
 
     public function behaviors()

@@ -17,11 +17,14 @@ return [
         /**
          * Strepz custom components
          */
-        'strepzConfig' => [
-            'class' => 'api\components\StrepzConfigManager',
+        'config' => [
+            'class' => 'api\modules\v1\account\components\StrepzConfigManager',
         ],
         'strepzDbManager' => [
             'class' => 'common\components\StrepzDbManager',
+        ],
+        'restTemplate' => [
+            'class' => 'api\modules\v1\account\components\RestResponseTemplate',
         ],
         'request' => [
             'enableCsrfValidation' => true,
@@ -67,6 +70,7 @@ return [
             'enableStrictParsing' => true,
             'showScriptName' => false,
             'rules' => [
+                'see/<module>/<controller>/<action>' => '<module>/<controller>/<action>',
                 [
                     'class' => 'api\modules\v1\account\rest\AuthUrlRule',
                     'pluralize' => true,
@@ -84,11 +88,10 @@ return [
                     'except' => ['delete'],
                 ],
                 [
-                    'class' => 'yii\rest\UrlRule',
+                    'class' => 'api\modules\v1\account\rest\UserUrlRule',
                     'pluralize' => true,
                     'controller' => [
                         'v1/users' => 'accounts/user',
-                        'v1/accounts' => 'accounts/default'
                     ],
                     'except' => ['delete'],
                 ],
